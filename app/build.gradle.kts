@@ -18,8 +18,10 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // todo: add api key here // mappers
-//        buildConfigField("String", "LOGIN_PUBLIC_KEY", project.properties["LOGIN_PUBLIC_KEY"] as String)
+        // todo: mappers
+        buildConfigField("String", "BASE_URL", project.properties["BASE_URL"] as String)
+        buildConfigField("String", "MARVEL_PUBLIC_KEY", project.properties["MARVEL_PUBLIC_KEY"] as String)
+        buildConfigField("String", "MARVEL_PRIVATE_KEY", project.properties["MARVEL_PRIVATE_KEY"] as String)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -44,6 +46,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {
@@ -107,6 +110,9 @@ dependencies {
 
     // lottie animation
     implementation(libs.lottie)
+
+    // timber logging
+    implementation(libs.timber)
 
     // testing
     testImplementation(libs.junit)

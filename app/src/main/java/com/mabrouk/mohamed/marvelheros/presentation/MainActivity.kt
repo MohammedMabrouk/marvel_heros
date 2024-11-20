@@ -9,9 +9,11 @@ import androidx.compose.material.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.mabrouk.mohamed.marvelheros.presentation.navigation.Navigation
+import com.mabrouk.mohamed.marvelheros.presentation.utils.generateMarvelApiHash
 import com.mabrouk.mohamed.marvelheros.ui.theme.MarvelHerosTheme
-import java.security.MessageDigest
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,13 +33,6 @@ class MainActivity : ComponentActivity() {
         val hash = generateMarvelApiHash(ts, publicKey, privateKey)
         Log.d("www", "onCreate: $hash")
     }
-}
-
-fun generateMarvelApiHash(ts: String, publicKey: String, privateKey: String): String {
-    val input = ts + privateKey + publicKey
-    val md = MessageDigest.getInstance("MD5")
-    val hashBytes = md.digest(input.toByteArray())
-    return hashBytes.joinToString("") { "%02x".format(it) } // Convert bytes to hex
 }
 
 // todo: readme file
