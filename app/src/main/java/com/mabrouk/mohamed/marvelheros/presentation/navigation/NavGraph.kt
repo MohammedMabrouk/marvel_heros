@@ -21,15 +21,10 @@ fun Navigation(
         composable(Screen.Home.route) { CharactersListScreen(navController = navController) }
         composable(Screen.Search.route) { CharacterSearchScreen(navController = navController) }
         composable(
-            Screen.CharacterDetails.route,
-            arguments = listOf(navArgument(CHARACTER_ID_ARGUMENT) { type = NavType.IntType })
-        ) {
-            val characterId = it.arguments?.getInt(CHARACTER_ID_ARGUMENT)
-            characterId?.let { id ->
-                CharacterDetailsScreen(navController = navController, characterId = id)
-            }
+            "${Screen.CharacterDetails.route}?character={character}",
+            arguments = listOf(navArgument("character") { type = NavType.StringType })
+        ) { navBackStackEntry ->
+            CharacterDetailsScreen(navController, navBackStackEntry)
         }
     }
 }
-
-private const val CHARACTER_ID_ARGUMENT = "character_id"

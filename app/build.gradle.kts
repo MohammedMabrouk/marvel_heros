@@ -114,6 +114,9 @@ dependencies {
     // timber logging
     implementation(libs.timber)
 
+    // Gson
+    implementation(libs.gson)
+
     // testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,6 +1,7 @@
 package com.mabrouk.mohamed.marvelheros.presentation.screens.charactersList
 
 import android.util.Log
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mabrouk.mohamed.marvelheros.domain.data.CharacterItem
@@ -85,6 +86,8 @@ class CharactersViewModel @Inject constructor(
             }
         }
     }
+
+    val lazyListState: LazyListState = LazyListState()
 
     companion object {
         private const val PAGE_SIZE = 10

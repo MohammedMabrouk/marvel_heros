@@ -28,7 +28,7 @@ fun CharactersList(
     isLoading: Boolean,
     isLastPageReached: Boolean,
     loadNextPage: () -> Unit,
-    onItemClicked: (Int?) -> Unit,
+    onItemClicked: (CharacterItem?) -> Unit,
 ) {
     val listState = rememberLazyListState()
 
@@ -44,7 +44,7 @@ fun CharactersList(
                 charactersList?.let {
                     items(it.size) { index ->
                         it[index]?.let { item ->
-                            CharacterUiItem(item) {onItemClicked(item.id)}
+                            CharacterUiItem(item) { onItemClicked(item) }
 
                             // last element in list
                             if (index == it.size - 1 && !isLoading && !isLastPageReached) {

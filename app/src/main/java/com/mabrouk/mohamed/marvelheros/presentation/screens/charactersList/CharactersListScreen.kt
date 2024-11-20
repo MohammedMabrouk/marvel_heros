@@ -1,5 +1,6 @@
 package com.mabrouk.mohamed.marvelheros.presentation.screens.charactersList
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -36,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
+import com.google.gson.Gson
 import com.mabrouk.mohamed.marvelheros.R
 import com.mabrouk.mohamed.marvelheros.domain.data.CharacterItem
 import com.mabrouk.mohamed.marvelheros.domain.data.GetCharactersDto
@@ -65,6 +67,7 @@ fun CharactersListScreen(
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
+
     val coroutineScope = rememberCoroutineScope()
     val charactersResult by viewModel.charactersResult.collectAsState()
     val charactersList by viewModel.charactersList.collectAsState()
@@ -76,7 +79,13 @@ fun CharactersListScreen(
         onSearchClicked = { navController.navigate(Screen.Search.route) },
         charactersResult = charactersResult,
         charactersList = charactersList,
-        onItemClick = {},
+        onItemClick = { character ->
+            character?.let {
+                val jsonCharacter = Gson().toJson(character)
+                val encodedJson = Uri.encode(jsonCharacter)
+                navController.navigate("${Screen.CharacterDetails.route}?character=$encodedJson")
+            }
+        },
         isLoading = isLoading,
         isLastPageReached = isLastPageReached,
         loadNextCharacters = { viewModel.getPagedCharacters(it) },
@@ -91,7 +100,7 @@ fun CharactersListScreenContent(
     onSearchClicked: () -> Unit,
     charactersResult: State<GetCharactersDto>,
     charactersList: List<CharacterItem?>?,
-    onItemClick: (Int) -> Unit,
+    onItemClick: (CharacterItem?) -> Unit,
     isLoading: Boolean,
     isLastPageReached: Boolean,
     loadNextCharacters: (Boolean) -> Unit,
@@ -100,6 +109,7 @@ fun CharactersListScreenContent(
     // Error State
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
@@ -160,7 +170,7 @@ fun CharactersListScreenContent(
                 isLoading = isLoading,
                 isLastPageReached = isLastPageReached,
                 loadNextPage = { loadNextCharacters(false) }) {
-
+                onItemClick(it)
             }
         }
     }
