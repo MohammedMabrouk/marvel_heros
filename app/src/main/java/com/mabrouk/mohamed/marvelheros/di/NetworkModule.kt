@@ -1,6 +1,7 @@
 package com.mabrouk.mohamed.marvelheros.di
 
 import com.mabrouk.mohamed.marvelheros.BuildConfig
+import com.mabrouk.mohamed.marvelheros.data.remote.ApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,16 +17,16 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-//    @Singleton
-//    @Provides
-//    fun provideRetrofitAPI(okHttpClient: OkHttpClient): ApiService {
-//        return Retrofit.Builder()
-//            .baseUrl(BuildConfig.BASE_URL)
-//            .addConverterFactory(GsonConverterFactory.create())
-//            .client(okHttpClient)
-//            .build()
-//            .create(ApiService::class.java)
-//    }
+    @Singleton
+    @Provides
+    fun provideRetrofitAPI(okHttpClient: OkHttpClient): ApiService {
+        return Retrofit.Builder()
+            .baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+            .create(ApiService::class.java)
+    }
 
     @Singleton
     @Provides

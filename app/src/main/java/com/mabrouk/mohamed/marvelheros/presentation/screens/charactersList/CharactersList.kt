@@ -24,11 +24,11 @@ import com.mabrouk.mohamed.marvelheros.presentation.component.ProgressIndicator
 @Composable
 fun CharactersList(
     modifier: Modifier,
-    charactersList: List<CharacterItem>?,
+    charactersList: List<CharacterItem?>?,
     isLoading: Boolean,
     isLastPageReached: Boolean,
     loadNextPage: () -> Unit,
-    onItemClicked: (Int) -> Unit,
+    onItemClicked: (Int?) -> Unit,
 ) {
     val listState = rememberLazyListState()
 
@@ -40,17 +40,17 @@ fun CharactersList(
                 state = listState,
                 modifier = Modifier
                     .fillMaxHeight()
-                    .padding(top = 8.dp)
             ) {
                 charactersList?.let {
                     items(it.size) { index ->
-                        CharacterUiItem(
-                            it[index]
-                        ) {}
+                        it[index]?.let { item ->
+                            CharacterUiItem(item) {onItemClicked(item.id)}
 
-                        if (index == it.size - 1 && !isLoading && !isLastPageReached) {
-                            LaunchedEffect(Unit) {
-                                loadNextPage()
+                            // last element in list
+                            if (index == it.size - 1 && !isLoading && !isLastPageReached) {
+                                LaunchedEffect(Unit) {
+                                    loadNextPage()
+                                }
                             }
                         }
                     }

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mabrouk.mohamed.marvelheros.domain.data.CharacterItem
+import com.mabrouk.mohamed.marvelheros.domain.data.GetCharactersDto
 import com.mabrouk.mohamed.marvelheros.domain.data.GetCharactersRequest
 import com.mabrouk.mohamed.marvelheros.domain.usecase.GetCharactersListUseCase
 import com.mabrouk.mohamed.marvelheros.presentation.utils.asStateFlow
@@ -23,15 +24,15 @@ class CharactersViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _charactersResult =
-        MutableStateFlow<State<List<CharacterItem>>>(State.Empty)
-    val charactersResult: StateFlow<State<List<CharacterItem>>> = _charactersResult
-    fun resetResult(){
+        MutableStateFlow<State<GetCharactersDto>>(State.Empty)
+    val charactersResult: StateFlow<State<GetCharactersDto>> = _charactersResult
+    fun resetResult() {
         _charactersResult.value = State.Empty
     }
 
     private val _charactersList =
-        MutableStateFlow<List<CharacterItem>?>(null)
-    val charactersList: StateFlow<List<CharacterItem>?> = _charactersList
+        MutableStateFlow<List<CharacterItem?>?>(null)
+    val charactersList: StateFlow<List<CharacterItem?>?> = _charactersList
 
     val isLoading: StateFlow<Boolean> = charactersResult.map {
         it == State.Loading
@@ -45,7 +46,7 @@ class CharactersViewModel @Inject constructor(
 
     private var charactersJob: Job? = null
 
-    fun getNextCharacters(isFirstLoad: Boolean, searchQuery: String? = null) {
+    fun getPagedCharacters(isFirstLoad: Boolean, searchQuery: String? = null) {
         if (charactersResult.value == State.Loading) return
 
         if (isFirstLoad) {
@@ -68,15 +69,15 @@ class CharactersViewModel @Inject constructor(
                 )
 
                 Log.d("www", "--> ${request}")
-                getCharactersListUseCase.getMockCharactersList(request).collect { result ->
+                getCharactersListUseCase.getCharactersList(request).collect { result ->
                     _charactersResult.value = result
                     if (result is State.Success) {
-                        result.data.toList().let {
-                            _charactersList.value = _charactersList.value?.plus(it)
+                        result.data.data?.toList()?.let {
+                            _charactersList.value = charactersList.value?.plus(it)
                         }
-                        // todo: check if last page 
-//                        _isLastPageReached.value = result.data.meta?.lastPage ?: false
-                        _offset.value = offset.value + 1
+
+                        _isLastPageReached.value = result.data.totalElements < offset.value + 1
+                        _offset.value = offset.value + PAGE_SIZE
                     }
                 }
             } catch (e: Exception) {
@@ -85,7 +86,7 @@ class CharactersViewModel @Inject constructor(
         }
     }
 
-    companion object{
+    companion object {
         private const val PAGE_SIZE = 10
     }
 }

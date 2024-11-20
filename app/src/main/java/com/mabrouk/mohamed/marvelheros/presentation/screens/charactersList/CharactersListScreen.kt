@@ -38,6 +38,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import com.mabrouk.mohamed.marvelheros.R
 import com.mabrouk.mohamed.marvelheros.domain.data.CharacterItem
+import com.mabrouk.mohamed.marvelheros.domain.data.GetCharactersDto
 import com.mabrouk.mohamed.marvelheros.presentation.navigation.Screen
 import com.mabrouk.mohamed.marvelheros.presentation.utils.network.State
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +51,7 @@ fun CharactersListScreen(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val currentFunction by rememberUpdatedState(newValue = {
-        viewModel.getNextCharacters(true)
+        viewModel.getPagedCharacters(true)
     })
 
     DisposableEffect(lifecycleOwner) {
@@ -78,20 +79,18 @@ fun CharactersListScreen(
         onItemClick = {},
         isLoading = isLoading,
         isLastPageReached = isLastPageReached,
-        loadNextCharacters = { viewModel.getNextCharacters(it) },
+        loadNextCharacters = { viewModel.getPagedCharacters(it) },
         onResetResult = { viewModel.resetResult() }
     )
 
 }
 
-// todo: add snackbar for error 
-
 @Composable
 fun CharactersListScreenContent(
     coroutineScope: CoroutineScope,
     onSearchClicked: () -> Unit,
-    charactersResult: State<List<CharacterItem>>,
-    charactersList: List<CharacterItem>?,
+    charactersResult: State<GetCharactersDto>,
+    charactersList: List<CharacterItem?>?,
     onItemClick: (Int) -> Unit,
     isLoading: Boolean,
     isLastPageReached: Boolean,
@@ -161,7 +160,7 @@ fun CharactersListScreenContent(
                 isLoading = isLoading,
                 isLastPageReached = isLastPageReached,
                 loadNextPage = { loadNextCharacters(false) }) {
-                // on item clicked
+
             }
         }
     }

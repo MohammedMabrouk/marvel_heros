@@ -1,7 +1,9 @@
 package com.mabrouk.mohamed.marvelheros.domain.usecase
 
 import com.mabrouk.mohamed.marvelheros.domain.data.CharacterItem
+import com.mabrouk.mohamed.marvelheros.domain.data.GetCharactersDto
 import com.mabrouk.mohamed.marvelheros.domain.data.GetCharactersRequest
+import com.mabrouk.mohamed.marvelheros.domain.repository.MarvelRepository
 import com.mabrouk.mohamed.marvelheros.presentation.utils.network.State
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -10,19 +12,30 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class GetCharactersListUseCase @Inject constructor(
-
+    private val repository: MarvelRepository,
 ) {
+    fun getCharactersList(getCharactersRequest: GetCharactersRequest): Flow<State<GetCharactersDto>> =
+        flow {
+            emit(State.Loading)
+            try {
+                val response = repository.getCharactersList(getCharactersRequest)
+                emit(State.Success(response))
+            } catch (e: Exception) {
+                emit(State.Error(e.message ?: ""))
+            }
+        }
 
-    fun getMockCharactersList(getCharactersRequest: GetCharactersRequest): Flow<State<List<CharacterItem>>> =
+    // todo: remove test data
+    fun getMockCharactersList(getCharactersRequest: GetCharactersRequest): Flow<State<GetCharactersDto>> =
         flow {
             Timber.d("getMockCharacterList")
             emit(State.Loading)
             delay(2000)
-//            emit(getMockData(getCharactersRequest.offset))
-            emit(State.Error("error msg"))
+            emit(getMockData(getCharactersRequest.offset))
+//            emit(State.Error("error msg"))
         }
 
-    private fun getMockData(page: Int): State.Success<List<CharacterItem>> {
+    private fun getMockData(page: Int): State.Success<GetCharactersDto> {
         val data = listOf(
             CharacterItem(
                 0,
@@ -45,6 +58,6 @@ class GetCharactersListUseCase @Inject constructor(
                 "http://i.annihil.us/u/prod/marvel/i/mg/1/b0/5269678709fb7.jpg"
             )
         )
-        return State.Success(data)
+        return State.Success(GetCharactersDto(4, data))
     }
 }

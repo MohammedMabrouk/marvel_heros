@@ -19,7 +19,7 @@ fun ProgressIndicator() {
         contentAlignment = Alignment.Center
     ) {
         LottieAnimation(
-            modifier = Modifier.size(35.dp),
+            modifier = Modifier.size(30.dp),
             R.raw.loading
         )
     }
