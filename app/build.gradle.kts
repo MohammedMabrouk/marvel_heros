@@ -105,6 +105,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.okhttp.interceptor)
 
+    // lottie animation
+    implementation(libs.lottie)
+
     // testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
