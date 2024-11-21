@@ -1,21 +1,21 @@
 package com.mabrouk.mohamed.marvelheros.domain.usecase
 
-import com.mabrouk.mohamed.marvelheros.domain.data.GetCharactersDto
-import com.mabrouk.mohamed.marvelheros.domain.data.GetCharactersRequest
+import com.mabrouk.mohamed.marvelheros.domain.data.CharacterDataItem
+import com.mabrouk.mohamed.marvelheros.domain.data.GetCharacterDataRequest
 import com.mabrouk.mohamed.marvelheros.domain.repository.MarvelRepository
 import com.mabrouk.mohamed.marvelheros.presentation.utils.network.State
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetCharactersListUseCase @Inject constructor(
+class GetCharacterDataUseCase @Inject constructor(
     private val repository: MarvelRepository,
 ) {
-    fun getCharactersList(getCharactersRequest: GetCharactersRequest): Flow<State<GetCharactersDto>> =
+    fun getCharacterData(request: GetCharacterDataRequest): Flow<State<CharacterDataItem>> =
         flow {
             emit(State.Loading)
             try {
-                val response = repository.getCharactersList(getCharactersRequest)
+                val response = repository.getCharacterInfo(request)
                 emit(State.Success(response))
             } catch (e: Exception) {
                 emit(State.Error(e.message ?: ""))

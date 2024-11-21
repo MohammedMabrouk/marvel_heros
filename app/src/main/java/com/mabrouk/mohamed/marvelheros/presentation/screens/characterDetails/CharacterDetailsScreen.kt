@@ -42,6 +42,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.google.gson.Gson
 import com.mabrouk.mohamed.marvelheros.R
+import com.mabrouk.mohamed.marvelheros.domain.data.CharacterDataItem
 import com.mabrouk.mohamed.marvelheros.domain.data.CharacterItem
 import com.mabrouk.mohamed.marvelheros.presentation.component.ExternalLinkText
 import com.mabrouk.mohamed.marvelheros.presentation.component.SectionContent
@@ -72,11 +73,9 @@ fun CharacterDetailsScreen(
         }
     }
 
-    val character by viewModel.character.collectAsState()
-
     CharacterDetailsScreenContent(
         onBackClicked = { navController.popBackStack() },
-        character = character
+        viewModel = viewModel
     )
 }
 
@@ -85,17 +84,31 @@ fun CharacterDetailsScreen(
 @Composable
 fun CharacterDetailsScreenContent(
     onBackClicked: () -> Unit,
-    character: CharacterItem?,
+    viewModel: CharacterDetailsViewModel,
 ) {
 
     // Error State
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
+    val character by viewModel.character.collectAsState()
+
+    val comicsList by viewModel.comicsList.collectAsState()
+    val isLastPageComicsReached by viewModel.isLastPageComicsReached.collectAsState()
+
+    val seriesList by viewModel.seriesList.collectAsState()
+    val isLastPageSeriesReached by viewModel.isLastPageSeriesReached.collectAsState()
+
+    val storiesList by viewModel.storiesList.collectAsState()
+    val isLastPageStoriesReached by viewModel.isLastPageStoriesReached.collectAsState()
+
+    val eventsList by viewModel.eventsList.collectAsState()
+    val isLastPageEventsReached by viewModel.isLastPageEventsReached.collectAsState()
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        if (character != null) {
+        character?.let { currentCharacter ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -112,9 +125,9 @@ fun CharacterDetailsScreenContent(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
                     ) {
-                        if (character.thumbnailUrl.isNotEmpty()) {
+                        if (currentCharacter.thumbnailUrl.isNotEmpty()) {
                             GlideImage(
-                                model = Uri.parse(character.thumbnailUrl),
+                                model = Uri.parse(currentCharacter.thumbnailUrl),
                                 contentDescription = "",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop,
@@ -142,51 +155,73 @@ fun CharacterDetailsScreenContent(
                     )
                 }
 
-//            when (charactersResult) {
-//                is State.Error -> {
-//                    LaunchedEffect(Unit) {
-//                        coroutineScope.launch {
-//                            snackbarHostState.showSnackbar(message = charactersResult.errorMessage)
-//                        }
-//                    }
-//                    onResetResult()
-//                }
-//
-//                else -> {}
-//            }
-//
-//            CharactersList(
-//                modifier = Modifier,
-//                charactersList = charactersList,
-//                isLoading = isLoading,
-//                isLastPageReached = isLastPageReached,
-//                loadNextPage = { loadNextCharacters(false) }) {
-//
-//            }
-
                 // name
-                if (character.name.isNotEmpty()) {
+                if (currentCharacter.name.isNotEmpty()) {
                     SectionTitle(stringResource(id = R.string.name_lbl))
-                    SectionContent(character.name)
+                    SectionContent(currentCharacter.name)
                 }
 
                 // description
-                if (!character.description.isNullOrEmpty()) {
+                if (!currentCharacter.description.isNullOrEmpty()) {
                     SectionTitle(stringResource(id = R.string.description_lbl))
-                    SectionContent(character.description)
+                    SectionContent(currentCharacter.description)
                 }
 
                 // comics
-                SectionTitle(stringResource(id = R.string.comics_lbl))
-                SectionContent("Hello Worlds")
+                if (comicsList.isNotEmpty()) {
+                    SectionTitle(stringResource(id = R.string.comics_lbl))
+                    CharacterInfoList(
+                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        characterDataItemList = comicsList,
+                        isLoading = false,
+                        isLastPageReached = isLastPageComicsReached,
+                        loadNextPage = { viewModel.getComics(false) },
+                        onItemClicked = { },
+                        pageSize = viewModel.pageSize
+                    )
+                }
 
                 // series
-                SectionTitle(stringResource(id = R.string.series_lbl))
-                SectionContent("Hello Worlds")
+                if (seriesList.isNotEmpty()) {
+                    SectionTitle(stringResource(id = R.string.series_lbl))
+                    CharacterInfoList(
+                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        characterDataItemList = seriesList,
+                        isLoading = false,
+                        isLastPageReached = isLastPageSeriesReached,
+                        loadNextPage = { viewModel.getSeries(false) },
+                        onItemClicked = { },
+                        pageSize = viewModel.pageSize
+                    )
+                }
+
+                // stories
+                if (storiesList.isNotEmpty()) {
+                    SectionTitle(stringResource(id = R.string.stories_lbl))
+                    CharacterInfoList(
+                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        characterDataItemList = storiesList,
+                        isLoading = false,
+                        isLastPageReached = isLastPageStoriesReached,
+                        loadNextPage = { viewModel.getStories(false) },
+                        onItemClicked = { },
+                        pageSize = viewModel.pageSize
+                    )
+                }
 
                 // events
-                SectionTitle(stringResource(id = R.string.events_lbl))
-                SectionContent("Hello Worlds")
+                if (eventsList.isNotEmpty()) {
+                    SectionTitle(stringResource(id = R.string.events_lbl))
+                    CharacterInfoList(
+                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+                        characterDataItemList = eventsList,
+                        isLoading = false,
+                        isLastPageReached = isLastPageEventsReached,
+                        loadNextPage = { viewModel.getEvents(false) },
+                        onItemClicked = { },
+                        pageSize = viewModel.pageSize
+                    )
+                }
 
                 // related links
                 SectionTitle(stringResource(id = R.string.related_links_lbl))
@@ -194,25 +229,40 @@ fun CharacterDetailsScreenContent(
                 ExternalLinkText(
                     context,
                     stringResource(id = R.string.detail_lbl),
-                    character.detailLink
+                    currentCharacter.detailLink
                 )
                 ExternalLinkText(
                     context,
                     stringResource(id = R.string.wiki_lbl),
-                    character.wikiLink
+                    currentCharacter.wikiLink
                 )
                 ExternalLinkText(
                     context,
                     stringResource(id = R.string.comic_link_lbl),
-                    character.comicLink
+                    currentCharacter.comicLink
                 )
             }
         }
     }
 }
-
+//
 //@Composable
 //@Preview(showBackground = true)
 //fun CharacterDetailsScreenPreview() {
-//    CharacterDetailsScreenContent()
+//    CharacterDetailsScreenContent(
+//        {},
+//        character = CharacterItem(
+//            id = 0,
+//            name = "name",
+//            thumbnailUrl = "",
+//            description = "description",
+//            comicsList = null,
+//            seriesList = null,
+//            storiesList = null,
+//            eventsList = null,
+//            detailLink = null,
+//            wikiLink = null,
+//            comicLink = null,
+//        )
+//    )
 //}

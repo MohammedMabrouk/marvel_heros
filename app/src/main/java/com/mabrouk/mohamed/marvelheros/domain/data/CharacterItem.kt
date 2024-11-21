@@ -20,6 +20,7 @@ data class CharacterItem(
 
 @Parcelize
 data class CharacterInfoItem(
+    val id: Int?,
     val name: String?,
-    val resourceURI: String?,
+    val resourceURI: String?
 ) : Parcelable

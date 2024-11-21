@@ -77,7 +77,7 @@ class CharactersViewModel @Inject constructor(
                             _charactersList.value = charactersList.value?.plus(it)
                         }
 
-                        _isLastPageReached.value = result.data.totalElements < offset.value + 1
+                        _isLastPageReached.value = result.data.totalElements <= offset.value + 1
                         _offset.value = offset.value + PAGE_SIZE
                     }
                 }
