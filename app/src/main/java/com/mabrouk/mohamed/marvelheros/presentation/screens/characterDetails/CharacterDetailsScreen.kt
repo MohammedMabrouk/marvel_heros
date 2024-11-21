@@ -25,7 +25,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.RenderEffect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -42,7 +45,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.google.gson.Gson
 import com.mabrouk.mohamed.marvelheros.R
-import com.mabrouk.mohamed.marvelheros.domain.data.CharacterDataItem
+import com.mabrouk.mohamed.marvelheros.domain.data.CharacterDataType
 import com.mabrouk.mohamed.marvelheros.domain.data.CharacterItem
 import com.mabrouk.mohamed.marvelheros.presentation.component.ExternalLinkText
 import com.mabrouk.mohamed.marvelheros.presentation.component.SectionContent
@@ -105,142 +108,256 @@ fun CharacterDetailsScreenContent(
     val eventsList by viewModel.eventsList.collectAsState()
     val isLastPageEventsReached by viewModel.isLastPageEventsReached.collectAsState()
 
+    val showImagesDialog by viewModel.showImagesDialog.collectAsState()
+    val dialogStartIndex by viewModel.dialogStartIndex.collectAsState()
+    val dialogType by viewModel.dialogType.collectAsState()
+
+    if (showImagesDialog) {
+        when (dialogType) {
+            CharacterDataType.COMIC -> {
+                ExpandedImagesDialog(
+                    onDismiss = {
+                        viewModel.setShowImagesDialog(false)
+                        viewModel.setDialogStartIndex(0)
+                    },
+                    characterDataItemList = comicsList,
+                    isLastPageReached = isLastPageComicsReached,
+                    loadNextPage = { viewModel.getComics(false) },
+                    pageSize = viewModel.pageSize,
+                    initialPosition = dialogStartIndex
+                )
+            }
+
+            CharacterDataType.SERIES -> {
+                ExpandedImagesDialog(
+                    onDismiss = {
+                        viewModel.setShowImagesDialog(false)
+                        viewModel.setDialogStartIndex(0)
+                    },
+                    characterDataItemList = seriesList,
+                    isLastPageReached = isLastPageSeriesReached,
+                    loadNextPage = { viewModel.getSeries(false) },
+                    pageSize = viewModel.pageSize,
+                    initialPosition = dialogStartIndex
+                )
+            }
+
+            CharacterDataType.STORY -> {
+                ExpandedImagesDialog(
+                    onDismiss = {
+                        viewModel.setShowImagesDialog(false)
+                        viewModel.setDialogStartIndex(0)
+                    },
+                    characterDataItemList = storiesList,
+                    isLastPageReached = isLastPageStoriesReached,
+                    loadNextPage = { viewModel.getStories(false) },
+                    pageSize = viewModel.pageSize,
+                    initialPosition = dialogStartIndex
+                )
+            }
+
+            CharacterDataType.EVENT -> {
+                ExpandedImagesDialog(
+                    onDismiss = {
+                        viewModel.setShowImagesDialog(false)
+                        viewModel.setDialogStartIndex(0)
+                    },
+                    characterDataItemList = eventsList,
+                    isLastPageReached = isLastPageEventsReached,
+                    loadNextPage = { viewModel.getEvents(false) },
+                    pageSize = viewModel.pageSize,
+                    initialPosition = dialogStartIndex
+                )
+            }
+        }
+
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         character?.let { currentCharacter ->
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(colorResource(id = R.color.gray))
-                    .verticalScroll(rememberScrollState())
             ) {
+
+                if (currentCharacter.thumbnailUrl.isNotEmpty()) {
+                    GlideImage(
+                        model = Uri.parse(currentCharacter.thumbnailUrl),
+                        contentDescription = "",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                }
+
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(400.dp)
-                        .background(colorResource(id = R.color.black)),
+                        .fillMaxSize()
+                        .graphicsLayer { alpha = 1f }
+                        .background(Color.Black.copy(alpha = 0.95f))
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
                 ) {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (currentCharacter.thumbnailUrl.isNotEmpty()) {
-                            GlideImage(
-                                model = Uri.parse(currentCharacter.thumbnailUrl),
-                                contentDescription = "",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop,
-                                alignment = Alignment.Center
-                            )
-                        } else {
-                            Image(
-                                painter = painterResource(R.drawable.ic_no_image),
-                                contentDescription = "",
-                                colorFilter = ColorFilter.tint(colorResource(id = R.color.white)),
-                                modifier = Modifier.size(100.dp),
-                                alignment = Alignment.Center
-                            )
-                        }
-                    }
-                    Icon(
-                        painter = painterResource(R.drawable.ic_back),
-                        contentDescription = "search",
-                        tint = colorResource(id = R.color.white),
                         modifier = Modifier
-                            .padding(start = 12.dp)
-                            .padding(top = 18.dp)
-                            .size(25.dp)
-                            .clickable { onBackClicked() }
+                            .fillMaxWidth()
+                            .height(400.dp)
+                            .background(colorResource(id = R.color.black)),
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (currentCharacter.thumbnailUrl.isNotEmpty()) {
+                                GlideImage(
+                                    model = Uri.parse(currentCharacter.thumbnailUrl),
+                                    contentDescription = "",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                    alignment = Alignment.Center
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(R.drawable.ic_no_image),
+                                    contentDescription = "",
+                                    colorFilter = ColorFilter.tint(colorResource(id = R.color.white)),
+                                    modifier = Modifier.size(100.dp),
+                                    alignment = Alignment.Center
+                                )
+                            }
+                        }
+                        Icon(
+                            painter = painterResource(R.drawable.ic_back),
+                            contentDescription = "search",
+                            tint = colorResource(id = R.color.white),
+                            modifier = Modifier
+                                .padding(start = 12.dp)
+                                .padding(top = 18.dp)
+                                .size(25.dp)
+                                .clickable { onBackClicked() }
+                        )
+                    }
+
+                    // name
+                    if (currentCharacter.name.isNotEmpty()) {
+                        SectionTitle(stringResource(id = R.string.name_lbl))
+                        SectionContent(currentCharacter.name)
+                    }
+
+                    // description
+                    if (!currentCharacter.description.isNullOrEmpty()) {
+                        SectionTitle(stringResource(id = R.string.description_lbl))
+                        SectionContent(currentCharacter.description)
+                    }
+
+                    // comics
+                    if (comicsList.isNotEmpty()) {
+                        SectionTitle(stringResource(id = R.string.comics_lbl))
+                        CharacterInfoList(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .padding(bottom = 12.dp),
+                            characterDataItemList = comicsList,
+                            isLoading = false,
+                            isLastPageReached = isLastPageComicsReached,
+                            loadNextPage = { viewModel.getComics(false) },
+                            onItemClicked = { type, index ->
+                                viewModel.setDialogStartIndex(index)
+                                viewModel.setDialogType(type)
+                                viewModel.setShowImagesDialog(true)
+                            },
+                            pageSize = viewModel.pageSize,
+                            type = CharacterDataType.COMIC
+                        )
+                    }
+
+                    // series
+                    if (seriesList.isNotEmpty()) {
+                        SectionTitle(stringResource(id = R.string.series_lbl))
+                        CharacterInfoList(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .padding(bottom = 12.dp),
+                            characterDataItemList = seriesList,
+                            isLoading = false,
+                            isLastPageReached = isLastPageSeriesReached,
+                            loadNextPage = { viewModel.getSeries(false) },
+                            onItemClicked = { type, index ->
+                                viewModel.setDialogStartIndex(index)
+                                viewModel.setDialogType(type)
+                                viewModel.setShowImagesDialog(true)
+                            },
+                            pageSize = viewModel.pageSize,
+                            type = CharacterDataType.SERIES
+                        )
+                    }
+
+                    // stories
+                    if (storiesList.isNotEmpty()) {
+                        SectionTitle(stringResource(id = R.string.stories_lbl))
+                        CharacterInfoList(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .padding(bottom = 12.dp),
+                            characterDataItemList = storiesList,
+                            isLoading = false,
+                            isLastPageReached = isLastPageStoriesReached,
+                            loadNextPage = { viewModel.getStories(false) },
+                            onItemClicked = { type, index ->
+                                viewModel.setDialogStartIndex(index)
+                                viewModel.setDialogType(type)
+                                viewModel.setShowImagesDialog(true)
+                            },
+                            pageSize = viewModel.pageSize,
+                            type = CharacterDataType.STORY
+                        )
+                    }
+
+                    // events
+                    if (eventsList.isNotEmpty()) {
+                        SectionTitle(stringResource(id = R.string.events_lbl))
+                        CharacterInfoList(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .padding(bottom = 12.dp),
+                            characterDataItemList = eventsList,
+                            isLoading = false,
+                            isLastPageReached = isLastPageEventsReached,
+                            loadNextPage = { viewModel.getEvents(false) },
+                            onItemClicked = { type, index ->
+                                viewModel.setDialogStartIndex(index)
+                                viewModel.setDialogType(type)
+                                viewModel.setShowImagesDialog(true)
+                            },
+                            pageSize = viewModel.pageSize,
+                            type = CharacterDataType.EVENT
+                        )
+                    }
+
+                    // related links
+                    SectionTitle(stringResource(id = R.string.related_links_lbl))
+
+                    ExternalLinkText(
+                        context,
+                        stringResource(id = R.string.detail_lbl),
+                        currentCharacter.detailLink
+                    )
+                    ExternalLinkText(
+                        context,
+                        stringResource(id = R.string.wiki_lbl),
+                        currentCharacter.wikiLink
+                    )
+                    ExternalLinkText(
+                        context,
+                        stringResource(id = R.string.comic_link_lbl),
+                        currentCharacter.comicLink
                     )
                 }
-
-                // name
-                if (currentCharacter.name.isNotEmpty()) {
-                    SectionTitle(stringResource(id = R.string.name_lbl))
-                    SectionContent(currentCharacter.name)
-                }
-
-                // description
-                if (!currentCharacter.description.isNullOrEmpty()) {
-                    SectionTitle(stringResource(id = R.string.description_lbl))
-                    SectionContent(currentCharacter.description)
-                }
-
-                // comics
-                if (comicsList.isNotEmpty()) {
-                    SectionTitle(stringResource(id = R.string.comics_lbl))
-                    CharacterInfoList(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                        characterDataItemList = comicsList,
-                        isLoading = false,
-                        isLastPageReached = isLastPageComicsReached,
-                        loadNextPage = { viewModel.getComics(false) },
-                        onItemClicked = { },
-                        pageSize = viewModel.pageSize
-                    )
-                }
-
-                // series
-                if (seriesList.isNotEmpty()) {
-                    SectionTitle(stringResource(id = R.string.series_lbl))
-                    CharacterInfoList(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                        characterDataItemList = seriesList,
-                        isLoading = false,
-                        isLastPageReached = isLastPageSeriesReached,
-                        loadNextPage = { viewModel.getSeries(false) },
-                        onItemClicked = { },
-                        pageSize = viewModel.pageSize
-                    )
-                }
-
-                // stories
-                if (storiesList.isNotEmpty()) {
-                    SectionTitle(stringResource(id = R.string.stories_lbl))
-                    CharacterInfoList(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                        characterDataItemList = storiesList,
-                        isLoading = false,
-                        isLastPageReached = isLastPageStoriesReached,
-                        loadNextPage = { viewModel.getStories(false) },
-                        onItemClicked = { },
-                        pageSize = viewModel.pageSize
-                    )
-                }
-
-                // events
-                if (eventsList.isNotEmpty()) {
-                    SectionTitle(stringResource(id = R.string.events_lbl))
-                    CharacterInfoList(
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-                        characterDataItemList = eventsList,
-                        isLoading = false,
-                        isLastPageReached = isLastPageEventsReached,
-                        loadNextPage = { viewModel.getEvents(false) },
-                        onItemClicked = { },
-                        pageSize = viewModel.pageSize
-                    )
-                }
-
-                // related links
-                SectionTitle(stringResource(id = R.string.related_links_lbl))
-
-                ExternalLinkText(
-                    context,
-                    stringResource(id = R.string.detail_lbl),
-                    currentCharacter.detailLink
-                )
-                ExternalLinkText(
-                    context,
-                    stringResource(id = R.string.wiki_lbl),
-                    currentCharacter.wikiLink
-                )
-                ExternalLinkText(
-                    context,
-                    stringResource(id = R.string.comic_link_lbl),
-                    currentCharacter.comicLink
-                )
             }
         }
     }

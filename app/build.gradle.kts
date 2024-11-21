@@ -18,7 +18,6 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // todo: mappers
         buildConfigField("String", "BASE_URL", project.properties["BASE_URL"] as String)
         buildConfigField("String", "MARVEL_PUBLIC_KEY", project.properties["MARVEL_PUBLIC_KEY"] as String)
         buildConfigField("String", "MARVEL_PRIVATE_KEY", project.properties["MARVEL_PRIVATE_KEY"] as String)

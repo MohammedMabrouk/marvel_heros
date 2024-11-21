@@ -216,6 +216,25 @@ class CharacterDetailsViewModel @Inject constructor(
         }
     }
 
+    // expanded images dialog
+    private val _showImagesDialog = MutableStateFlow(false)
+    val showImagesDialog: StateFlow<Boolean> = _showImagesDialog
+    fun setShowImagesDialog(show: Boolean){
+        _showImagesDialog.value = show
+    }
+
+    private val _dialogType = MutableStateFlow(CharacterDataType.COMIC)
+    val dialogType: StateFlow<CharacterDataType> = _dialogType
+    fun setDialogType(type: CharacterDataType){
+        _dialogType.value = type
+    }
+
+    private val _dialogStartIndex = MutableStateFlow(0)
+    val dialogStartIndex: StateFlow<Int> = _dialogStartIndex
+    fun setDialogStartIndex(index: Int){
+        _dialogStartIndex.value = index
+    }
+
     companion object {
         private const val PAGE_SIZE = 4
     }

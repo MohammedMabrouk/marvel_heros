@@ -32,6 +32,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.mabrouk.mohamed.marvelheros.R
 import com.mabrouk.mohamed.marvelheros.domain.data.CharacterDataItem
+import com.mabrouk.mohamed.marvelheros.domain.data.CharacterDataType
 import com.mabrouk.mohamed.marvelheros.presentation.component.ProgressIndicator
 
 @Composable
@@ -41,11 +42,22 @@ fun CharacterInfoList(
     isLoading: Boolean,
     isLastPageReached: Boolean,
     loadNextPage: () -> Unit,
-    onItemClicked: (Int) -> Unit,
+    onItemClicked: (CharacterDataType, Int) -> Unit,
     pageSize: Int,
+    type: CharacterDataType,
+    isExpandedView: Boolean = false,
+    initialPosition: Int = 0,
 ) {
     val listState = rememberLazyListState()
-
+    LaunchedEffect(Unit) {
+        if (
+            characterDataItemList != null &&
+            initialPosition > 0 &&
+            initialPosition < characterDataItemList.size
+        ) {
+            listState.scrollToItem(initialPosition)
+        }
+    }
     Box(
         modifier = modifier.fillMaxSize(),
     ) {
@@ -61,7 +73,8 @@ fun CharacterInfoList(
                             CharacterInfoItem(
                                 index,
                                 item,
-                                { onItemClicked(index) }
+                                { onItemClicked(type, index) },
+                                isExpandedView
                             )
 
                             // last element in list
@@ -91,22 +104,32 @@ fun CharacterInfoItem(
     index: Int,
     characterDataItem: CharacterDataItem,
     onItemClicked: (Int) -> Unit,
+    isExpandedView: Boolean,
 ) {
+    val totalHeight = if (isExpandedView) 500 else 160
+    val totalWidth = if (isExpandedView) 300 else 110
+    val imageHeight = if (isExpandedView) 400 else 120
+    val errorImageHeight = if (isExpandedView) 380 else 110
+    val textSize = if (isExpandedView) 18 else 10
+    val lineHeight = if (isExpandedView) 18 else 14
+    val scaleType = if (isExpandedView) ContentScale.Fit else ContentScale.Crop
+
     Column(
         modifier = Modifier
-            .height(160.dp)
-            .width(110.dp)
+            .height(totalHeight.dp)
+            .width(totalWidth.dp)
             .padding(horizontal = 4.dp)
             .clickable { onItemClicked(index) }
     ) {
+
         if (characterDataItem.thumbnailUrl.isNotEmpty()) {
             GlideImage(
                 model = Uri.parse(characterDataItem.thumbnailUrl),
                 contentDescription = "",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp),
-                contentScale = ContentScale.Crop,
+                    .height(imageHeight.dp),
+                contentScale = scaleType,
                 alignment = Alignment.Center
             )
         } else {
@@ -116,7 +139,7 @@ fun CharacterInfoItem(
                 colorFilter = ColorFilter.tint(colorResource(id = R.color.white)),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(110.dp)
+                    .height(errorImageHeight.dp)
                     .padding(18.dp),
                 alignment = Alignment.Center
             )
@@ -128,8 +151,8 @@ fun CharacterInfoItem(
                 .padding(horizontal = 2.dp),
             text = characterDataItem.name,
             style = TextStyle(
-                fontSize = 10.sp,
-                lineHeight = 14.sp
+                fontSize = textSize.sp,
+                lineHeight = lineHeight.sp
             ),
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Normal,

@@ -76,7 +76,7 @@ fun CharactersListScreen(
 
     CharactersListScreenContent(
         coroutineScope = coroutineScope,
-        onSearchClicked = { navController.navigate(Screen.Search.route) },
+        onSearchClicked = {},
         charactersResult = charactersResult,
         charactersList = charactersList,
         onItemClick = { character ->
